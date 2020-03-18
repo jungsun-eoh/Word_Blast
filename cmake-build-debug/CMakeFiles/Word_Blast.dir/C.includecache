@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/eoh/Documents/csc415/Word Blast/main.c
+stdio.h
+-
+string.h
+-
+stdlib.h
+-
+time.h
+-
+pthread.h
+-
+uthash.h
+/Users/eoh/Documents/csc415/Word Blast/uthash.h
+
+/Users/eoh/Documents/csc415/Word Blast/uthash.h
+string.h
+-
+stddef.h
+-
+stdlib.h
+-
+stdint.h
+-
+stdint.h
+-
+stdint.h
+-
+stdio.h
+-
+
