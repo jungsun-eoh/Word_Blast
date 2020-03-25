@@ -7,6 +7,12 @@
 #IncludeRegexTransform: 
 
 /Users/eoh/Documents/csc415/Word Blast/main.c
+sys/stat.h
+-
+stdlib.h
+-
+unistd.h
+-
 stdio.h
 -
 string.h
@@ -18,6 +24,10 @@ time.h
 string.h
 -
 pthread.h
+-
+fcntl.h
+-
+zconf.h
 -
 uthash.h
 /Users/eoh/Documents/csc415/Word Blast/uthash.h
