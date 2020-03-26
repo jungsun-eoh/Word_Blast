@@ -22,7 +22,6 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <zconf.h>
-#include "uthash.h"     // Copyright (c) 2003-2018, Troy D. Hanson
 
 #ifdef DEBUG
 #define DEBUG_TEST 1
@@ -33,17 +32,15 @@
 // easy to change spec in one place
 #define MINCHARS 6
 #define TOP 10
+#define SIZEBLOCK 2500
 
 #define debug_print(fmt, ...) \
             do { if(DEBUG_TEST) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
-
-
-struct wordFrequency {
-    const char* word;   // key
-    int frequency;      // value
-    UT_hash_handle hh;
-};
+typedef struct wordFrequency {
+    char* word;
+    int frequency;
+} wordFrequency ,*wordFrequency_p;
 
 typedef struct taskInfo {
     char * filename;
@@ -52,17 +49,13 @@ typedef struct taskInfo {
     long size;
 } taskInfo, *taskInfo_p ;
 
-struct wordFrequency *wordTable = NULL;     // hash table to keep word and its frequency.
+volatile wordFrequency_p *wordTable = NULL;     //array of target word
+volatile int wordListCount = 0;                 // number of value in the array
+int maxWordListSize = 0;                        // size of the array
+pthread_mutex_t lock;
 
-
-
-void *add_word(const char* w);
-/* adding word to hashtable. if the word already exists, value of the key(the word) will increment by 1.
- * So the hash table will keep tracking how many times the word appeared in the .txt file.
- */
-
+void add_word(char* w);
 void* threadWorking(void *);
-
 long getTaskSize(char*, int);
 
 int main(int argc, char *argv[])
@@ -203,27 +196,9 @@ void *threadWorking(void *p)
     return NULL;
 }
 
-//void *add_word(const char* w) {
-//    struct wordFrequency *wF = NULL;
-//
-//    HASH_FIND_STR( wordTable, w, wF);
-//
-//    if(wF == NULL)
-//    {
-//        wF = (struct wordFrequency *)malloc(sizeof *wF);
-//        wF->word = w;
-//        wF->frequency = 1;
-//
-//        HASH_ADD_KEYPTR(hh, wordTable, wF->word, strlen(wF->word), wF);
-//    }
-//    else
-//    {
-//        wF = (struct wordFrequency *)malloc(sizeof( *wF));
-//        wF->word = w;
-//        wF->frequency = (wF->frequency) + 1;
-//
-//        HASH_ADD_KEYPTR(hh, wordTable, wF->word, strlen(wF->word), wF);
-//    }
-//    return NULL;
-//}
+void add_word(char* w) {
+
+
+    return;
+}
 
