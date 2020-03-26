@@ -9,16 +9,18 @@
 /Users/eoh/Documents/csc415/Word Blast/main.c
 stdio.h
 -
+string.h
+-
 stdlib.h
+-
+time.h
 -
 string.h
 -
-stdbool.h
--
-ctype.h
--
 pthread.h
 -
-time.h
+fcntl.h
+-
+zconf.h
 -
 
