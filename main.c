@@ -91,12 +91,27 @@ int main(int argc, char *argv[])
     infoArr = malloc(sizeof(taskInfo) * numberOfThread);
     threadPT = malloc(sizeof(pthread_t) * numberOfThread);
 
+    int fileDescripter;
+    long filelen;
+
+    fileDescripter = open(fileName, O_RDONLY);
+
+    if (fileDescripter == 0) { printf("File open error\n"); }
+    else {
+        lseek(fileDescripter, 0, SEEK_END);
+        filelen = lseek(fileDescripter, 0, SEEK_CUR);
+    }
+
     for(int i =0; i<numberOfThread; i++)
     {
         infoArr[i].filename = fileName;
         infoArr[i].threadID = i+1;  // give thread ID for easy debug
         infoArr[i].start = taskSize * i;
-        infoArr[i].size = taskSize;
+
+        if(i == numberOfThread -1)
+            infoArr[i].size = filelen - infoArr->start;
+        else
+            infoArr[i].size = taskSize;
 
         pthread_create(&(threadPT[i]), NULL, threadWorking, &infoArr[i]);
     }
@@ -111,7 +126,7 @@ int main(int argc, char *argv[])
         top10[j].frequency = 0;
     }
 
-    for(int j = 0;  j< wordListCount; j++)
+        for(int j = 0;  j< wordListCount; j++)
     {
         if(wordTable[j]->frequency > top10[TOP-1].frequency)
         {
