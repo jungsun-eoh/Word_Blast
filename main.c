@@ -39,12 +39,16 @@ typedef struct wordFrequency {
     int frequency;      // value
 } wordFrequency, *wordFrequency_p;
 
-volatile wordFrequency_p wordTable = NULL;
-volatile int maxWordTable = 0;  //size of the array
+wordFrequency_p wordTable = NULL;
+int maxWordTable = 0;  //size of the array
 int countWordTable = 0;     // number of value in the array
 
-long taskSize;
+int count =0;
+
+long taskSize = 0;
 char* fileName;
+int numberOfThread = 0;
+
 pthread_mutex_t lock;
 
 void add_word(char* w);
@@ -52,11 +56,10 @@ void add_word(char* w);
  * So the hash table will keep tracking how many times the word appeared in the .txt file.
  */
 void* threadWorking(void *);
-void getTaskSize(char*, int);
+void getTaskSize(void);
 
 int main(int argc, char *argv[])
 {
-    int numberOfThread;
     pthread_t* threadPT;
     int* index;
 
@@ -71,7 +74,7 @@ int main(int argc, char *argv[])
     {
         fileName = argv[1];
         numberOfThread = atoi(argv[2]);
-        getTaskSize(fileName, numberOfThread);
+        getTaskSize();
     }
     else
         {
@@ -111,7 +114,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void getTaskSize(char* fileName, int numberOfThread)
+void getTaskSize(void)
 {
     int fileDescripter;
     long fileLen;
@@ -184,15 +187,11 @@ void *threadWorking(void *arg)
         {
             add_word(word);
             //debug_print("%d word :: %s\n", index_i, word);
+
         }
         word = strtok_r(NULL, delim, &saveptr);
+
     }
-
-
-
-
-
-
 
 
 
@@ -200,8 +199,9 @@ void *threadWorking(void *arg)
     free(buf);
     return NULL;
 }
-
 void add_word(char* w) {
+
+    //debug_print("word :: %s\n", w);
     if(wordTable == NULL)  // first input.
     {
         pthread_mutex_lock(&lock);
