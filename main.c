@@ -105,9 +105,39 @@ int main(int argc, char *argv[])
     for(int i =0; i<numberOfThread; i++) {
         pthread_join(threadPT[i], NULL);
     }
+// find the top list
+    wordFrequency top10[TOP];
+    for (int j = 0; j < TOP; j++) {
+        top10[j].frequency = 0;
+    }
+
+    for(int j = 0;  j< wordListCount; j++)
+    {
+        if(wordTable[j]->frequency > top10[TOP-1].frequency)
+        {
+            //debug_print("TOP %d. Adding %s %d\n", TOP, wordTable[j].word, wordTable[j].frequency);
+
+            top10[TOP-1].word = wordTable[j]->word;
+            top10[TOP-1].frequency = wordTable[j]->frequency;
+
+            for(int p = TOP-2; p >=0; p-- )
+            {
+                if (wordTable[j]->frequency > top10[p].frequency)
+                {
+                    top10[p+1].word = top10[p].word;
+                    top10[p+1].frequency = top10[p].frequency;
+                    top10[p].word = top10[j].word;
+                    top10[p].frequency = top10[j].frequency;
+                }
+            }
+        }
+    }
 
     printf("\n Word frequency count on %s with %d threads\n", fileName, numberOfThread);
     printf("printing top %d words %d char or more.\n", TOP, MINCHARS);
+
+    for(int a = 0; a < TOP; a++)
+        printf ("Number %d is %s with a count of %d", a+1, top10[a].word, top10[a].frequency);
 
 
 
@@ -160,7 +190,9 @@ void *threadWorking(void *p)
     taskInfo_p info = (taskInfo_p) p;
     int fileDescripter;
     char *buf;
-
+    char *word;
+    char *saveptr;
+    char * delim = "\"\'.""''?:;-,—*($%)! \t\n\x0A\r";
     // need extra 4 for wide null
     buf = malloc(info->size + 4);
 
@@ -192,13 +224,78 @@ void *threadWorking(void *p)
     buf[info->size] = 0;
     buf[info->size+1] = 0;
 
+    // chunk down the taskthread by word using strtok_r()
+    word = strtok_r(buf, delim, &saveptr);
+    //debug_print("%d word :: %s\n", index_i, word);
+
+    while (word != NULL)
+    {
+        long int charSize = strlen(word);
+
+        if (charSize >= MINCHARS)
+        {
+            add_word(word);
+            //debug_print("%d word :: %s\n", index_i, word);
+        }
+        word = strtok_r(NULL, delim, &saveptr);
+    }
+
+
+
     free(buf);
     return NULL;
 }
 
 void add_word(char* w) {
+    for(int i =0; i < wordListCount; i ++)        // find the word in the table
+    {
+        if (strcasecmp(wordTable[i]->word, w) == 0)
+        {
+            pthread_mutex_lock(&lock);
+            wordTable[i]->frequency = wordTable[i]->frequency +1;
+            pthread_mutex_unlock(&lock);
+            return;
+        }
+    }
+    pthread_mutex_lock(&lock);
+    //debug_print("maxWordTable: %d\n countWordTable: %d\n", maxWordTable, countWordTable);
 
+    if(wordListCount >= maxWordListSize)
+        // if we don't have enough room for the table, we reallocate malloc.
+    {
+        maxWordListSize= maxWordListSize + SIZEBLOCK;
+        if(wordTable == NULL)  // first input.
+        {
+            wordTable = malloc(sizeof(wordFrequency) * maxWordListSize);
+            if (wordTable == NULL) {
+                printf("first init malloc error in addWord\n");
+                exit(-2);
+            }
+            // w is char pointer, and pointer could change it. we have to make new heap memory to store
+            // word to always have valid value.
+        } else
+        {
+            wordFrequency_p reallocRet = realloc (*wordTable, sizeof(wordFrequency) * maxWordListSize);
+            if (reallocRet == NULL)
+            {
+                printf("realloc malloc error in addWord\n");
+                exit(-2);
+            }
+            wordTable = &reallocRet;
+        }
+    }
+    // add the word to the list
+
+    wordTable[wordListCount]->word = malloc(strlen(w) + 2);
+    if (wordTable[wordListCount]->word == NULL) {
+        printf("word malloc error in addWord\n");
+        exit(-2);
+    }
+    strcpy(wordTable[wordListCount]->word, w);  //copy the word into wordTable
+    wordTable[wordListCount]->frequency = 1;
+    ++wordListCount;
+
+    pthread_mutex_unlock(&lock);
 
     return;
 }
-
